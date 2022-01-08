@@ -1,0 +1,107 @@
+###   Task 1
+Add 5 documents to the database (use your s# number for bucket name), each document should be a json with 4 fields of at least two different types
+
+curl -i -XPOST -H "Content-Type: application/json" -d '{
+  "name": "Benjamin Romero",
+  "studiesAverage": 5.0,
+  "requiredInternships": 320,
+  "isGraduate": false
+}' http://localhost:8098/buckets/s24015/keys/benjamin
+
+curl -i -XPOST -H "Content-Type: application/json" -d '{
+  "name": "Shawn Little",
+  "studiesAverage": 4.73,
+  "requiredInternships": 0,
+  "isGraduate": false
+}' http://localhost:8098/buckets/s24015/keys/shawn
+
+curl -i -XPOST -H "Content-Type: application/json" -d '{
+  "name": "Samuel Flores",
+  "studiesAverage": 3.4,
+  "requiredInternships": 320,
+  "isGraduate": true
+}' http://localhost:8098/buckets/s24015/keys/samuel13
+
+curl -i -XPOST -H "Content-Type: application/json" -d '{
+  "name": "Sean Duncan",
+  "studiesAverage": 4.46,
+  "requiredInternships": 320,
+  "isGraduate": false
+}' http://localhost:8098/buckets/s24015/keys/sean4
+
+curl -i -XPOST -H "Content-Type: application/json" -d '{
+  "name": "Roy Martinez",
+  "studiesAverage": 3.5,
+  "requiredInternships": 0,
+  "isGraduate": true
+}' http://localhost:8098/buckets/s24015/keys/roy
+
+
+###   Task 2
+Retrieve one of your documents from the db
+
+curl -i http://localhost:8098/buckets/s24015/keys/benjamin
+
+
+###   Task 3
+Modify one of your documents by adding a new field to the document
+
+curl -i -XPUT -H "Content-Type: application/json" -d '{
+  "name": "Sean Duncan",
+  "studiesAverage": 4.46,
+  "requiredInternships": 320,
+  "status": "Hello, world!",
+  "isGraduate": false
+}' http://localhost:8098/buckets/s24015/keys/sean4?returnbody=true
+
+
+###   Task 4
+Modify one of your documents by deleting one field
+
+curl -i -XPUT -H "Content-Type: application/json" -d '{
+  "name": "Sean Duncan",
+  "studiesAverage": 4.46,
+  "isGraduate": false
+}' http://localhost:8098/buckets/s24015/keys/sean4?returnbody=true
+
+
+###   Task 5
+Modify one of your documents by changing the value of its fields
+
+curl -i -XPUT -H "Content-Type: application/json" -d '{
+  "name": "Sean Duncan",
+  "studiesAverage": 4.46,
+  "isGraduate": true
+}' http://localhost:8098/buckets/s24015/keys/sean4?returnbody=true
+
+
+###   Task 6
+Remove one document from the db
+
+curl -i -XDELETE http://localhost:8098/buckets/s24015/keys/samuel13
+
+
+###   Task 7
+Try to retrieve non-existent document from the db
+
+curl -i http://localhost:8098/buckets/s24015/keys/samuel13
+
+
+###   Task 8
+Add one json document to the db without specifying key under which it should be stored
+
+curl -i -XPOST -H "Content-Type: application/json" -d '{
+  "msg": "Hello World"
+}' http://localhost:8098/buckets/s24015/keys?returnbody=true
+
+
+###   Task 9
+Retrieve document from task 8 from the db
+
+curl -i http://localhost:8098/buckets/s24015/keys/P8l7gtodbYzoWyoOuf3iplOzAIy
+
+
+###   Task 10
+Delete document from task 8 from the db
+
+curl -i -XDELETE http://localhost:8098/buckets/s24015/keys/P8l7gtodbYzoWyoOuf3iplOzAIy

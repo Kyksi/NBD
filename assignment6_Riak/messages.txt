@@ -1,0 +1,6 @@
+Document added to database: 24015
+Document: 24015 - {"studiesAverage": 5.0, "requiredInternships": 0, "number": 24015, "name": "Nazar Semeniuk"}
+Document: 24015 - has been updated (changed field 'requiredInternships' to 320)
+Document: 24015 - {"studiesAverage": 5.0, "requiredInternships": 320, "number": 24015, "name": "Nazar Semeniuk"}
+Document: 24015 - has been deleted
+Unable to find document: 24015 (Document: None)

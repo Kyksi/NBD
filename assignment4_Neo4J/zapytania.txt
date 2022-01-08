@@ -1,0 +1,103 @@
+Nazar Semeniuk - s24015@pjwstk.edu.pl
+
+Gf1ORHMfrwBXdhsxTHm4wng_d4e603uVuZUktBj-WmY
+
+                          Part 1 – Mountain trips
+
+###   Query 1
+Shortest (least stages) routes from Darjeeling to Sandakphu that can be used in winter:
+
+MATCH shortestWinterRouteDS = allShortestPaths((:town { name: 'Darjeeling' })-[*]->(:peak { name: 'Sandakphu' }))
+WHERE ALL (route IN relationships(shortestWinterRouteDS) WHERE route.winter = 'true')
+RETURN shortestWinterRouteDS
+
+
+###   Query 2
+All routes you can use to get from Darjeeling to Sandakphu, sorted by the distance you need to travel:
+
+MATCH routeDS = (:town { name: 'Darjeeling' })-[*]->(:peak { name: 'Sandakphu' })
+WITH routeDS, reduce(totalDistance = 0, route IN relationships(routeDS) | totalDistance + route.distance) AS distance
+RETURN routeDS, distance ORDER BY distance
+
+
+##   Query 3
+All places you can get from Darjeeling using a twowheeler in the summer:
+
+MATCH routeFD = (:town { name: 'Darjeeling' })-[*]->(to)
+WHERE ALL (route IN relationships(routeFD) WHERE route.summer = 'true' AND type(route) = 'twowheeler')
+RETURN DISTINCT to.name
+
+// no records
+
+
+
+                          Part 2 - Airlines
+
+###   Query 4
+List of all airports sorted by number of flights starting in them:
+
+MATCH (flight:Flight)-[:ORIGIN]->(airport:Airport)
+RETURN airport, COUNT(flight) AS flights ORDER BY flights
+
+
+###   Query 5
+List of all airports you can reach (directly or indirectly) from LAX spending less than 3000:
+
+MATCH (dAirport:Airport)<-[origin:ORIGIN]-(flight:Flight)-[destination:DESTINATION]->(aAirport:Airport),(flight)<-[:ASSIGN]-(ticket:Ticket)
+WITH dAirport, flight, aAirport, MIN(ticket.price) AS minTicketPrice
+MATCH (flight)<-[:ASSIGN]-(minTicket: Ticket { price: minTicketPrice })
+CREATE (dAirport)-[cheapestFlights:CheapestFlight { class: minTicket.class, date: flight.date, airline: flight.airline, price: minTicket.price, duration: flight.duration, distance: flight.distance }]->(aAirport)
+RETURN cheapestFlights AS CheapestFlights ORDER BY CheapestFlights.price ASC
+
+MATCH cheapestFlights = (dAirport:Airport { name: "LAX" })-[cheapestFlight:CheapestFlight*1..7]->(aAirport:Airport)
+WITH aAirport, cheapestFlights, reduce(totalPrice = 0, flight IN relationships(cheapestFlights) | totalPrice + flight.price) AS finalTotalPrice
+WHERE finalTotalPrice < 3000
+RETURN DISTINCT aAirport
+
+
+###   Query 6
+Sort connections you can use to go from LAX to DAY by connection price:
+
+MATCH flightLD = (:Airport { name: 'LAX' })-[*]->(:Airport { name: 'DAY' })
+WITH flightLD, reduce(totalPrice = 0, flight IN relationships(flightLD) | totalPrice + flight.price) AS totalPrice
+RETURN flightLD, totalPrice ORDER BY totalPrice ASC
+
+// Unfortunately there is no connection between LAX and DAY
+###   Query 7
+Cheapest connection from LAX to DAY:
+
+MATCH flightLD = (:Airport { name: 'LAX' })-[cheapestFlight:CheapestFlight*]->(:Airport { name: 'DAY' })
+WITH flightLD, reduce(totalPrice = 0, flight IN relationships(flightLD) | totalPrice + flight.price) AS totalPrice
+RETURN flightLD, totalPrice ORDER BY totalPrice ASC
+LIMIT 1
+
+// Unfortunately there is no connection between LAX and DAY
+###   Query 8
+Cheapest connection from LAX to DAY in business class:
+
+MATCH (dAirport:Airport)<-[:DESTINATION]-(flight:Flight)-[:ORIGIN]->(aAirport:Airport), (t:Ticket { class : 'business' })-[:ASSIGN]->(flight)
+CREATE (aAirport)-[businessClass:BusinessClass { class: t.class, price: t.price, duration: flight.duration, date: flight.date, distance: flight.distance, airline: flight.airline }]->(dAirport)
+RETURN businessClass;
+
+MATCH flightsLD=(dAirport:Airport { name : 'LAX' })-[businessClass:BusinessClass*1..5]->(aAirport:Airport { name : 'DAY' }), (dAirport:Airport)<-[:ORIGIN]-(), (arrivalAirport:Airport)<-[:DESTINATION]-()
+WITH flightsLD, reduce(totalPrice = 0, flight IN relationships(flightsLD) | totalPrice + flight.price) AS price
+RETURN flightsLD AS flight, price ORDER BY price ASC
+LIMIT 1
+
+
+###   Query 9
+List of airlines sorted by the number of cities they offer connections to and from 
+(unique cities taking part in :ORIGIN and :DESTINATION of Flight nodes handled by given airline):
+
+MATCH (airport:Airport)-[:ORIGIN|:DESTINATION]-(flight:Flight)
+RETURN flight.airline AS airline, COUNT(DISTINCT airport) AS countCities ORDER BY countCities ASC
+
+
+###   Query 10
+Cheapest connection between 3 different airports:
+
+MATCH flight = (firstAirport:Airport)-[firstCFlight:CheapestFlight]-(secondAirport:Airport)-[secondCFlight:CheapestFlight]-(thirdAirport:Airport)
+WHERE firstAirport.name <> thirdAirport.name
+WITH flight, (firstCFlight.price + secondCFlight.price) AS price, firstAirport, secondAirport, thirdAirport
+RETURN flight, price, firstAirport.name, secondAirport.name, thirdAirport.name ORDER BY price ASC
+LIMIT 1
